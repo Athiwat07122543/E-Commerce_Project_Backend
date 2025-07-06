@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  relationMode = "prisma"
+}
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String
+  password  String
+  email     String    @unique
+  role      Role      @default(user)
+  enabled   Boolean
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  addresses Address[]
+  cart      Cart?
+  orders    Order[]
+}
+
+model Address {
+  id            Int      @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+  recipientName String
+  addressDetail String
+  phone         String
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  orders        Order[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  quantity     Int            @default(0)
+  sold         Int            @default(0)
+  price        Int
+  category     Category?      @relation(fields: [categoryId], references: [id])
+  categoryId   Int?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  images       ProductImage[]
+  orderDetails DetailOrder[]
+
+  cartDetails DetailCart[]
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  imageUrl  String
+}
+
+model Order {
+  id             Int           @id @default(autoincrement())
+  user           User?         @relation(fields: [userId], references: [id])
+  userId         Int?
+  totalPrice     Float
+  status         String
+  address        Address?      @relation(fields: [addressId], references: [id])
+  addressId      Int?
+  stripeId       String
+  stripeUrl      String?
+  shippingnumber String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  orderDetails   DetailOrder[]
+}
+
+model DetailOrder {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  price     Int
+  quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+}
+
+model Cart {
+  id          Int          @id @default(autoincrement())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int          @unique
+  createdAt   DateTime     @default(now())
+  cartDetails DetailCart[]
+}
+
+model DetailCart {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  price     Int
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    Int
+}
