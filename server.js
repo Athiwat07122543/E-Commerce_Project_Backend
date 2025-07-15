@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = 3000;
@@ -5,7 +6,6 @@ const router = require("./routes");
 const cors = require("cors");
 const { webhookHandler } = require("./controller/Stripe");
 
-require("dotenv").config();
 app.use(cors());
 app.post("/webhook", express.raw({ type: "application/json" }), webhookHandler);
 app.use(express.json());
