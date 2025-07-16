@@ -4,7 +4,6 @@ const stripe_url = process.env.STRIPE_URL_WEB;
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const API_BASE_URL = process.env.VITE_BACKEND
 
 exports.checkOut = async (req, res) => {
   try {
