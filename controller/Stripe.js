@@ -1,8 +1,10 @@
 const express = require("express");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe_url = process.env.STRIPE_URL_WEB;
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const API_BASE_URL = process.env.VITE_BACKEND
 
 exports.checkOut = async (req, res) => {
   try {
@@ -70,8 +72,8 @@ exports.checkOut = async (req, res) => {
       payment_method_types: ["card"],
       line_items: listProduct,
       mode: "payment",
-      success_url: "http://localhost:5173/success",
-      cancel_url: "http://localhost:5173/cancel",
+      success_url: `${stripe_url}/success`,
+      cancel_url: `${stripe_url}/cancel`,
     });
 
     const sessionId = session.id;
